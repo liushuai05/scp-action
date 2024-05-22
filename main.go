@@ -1,7 +1,10 @@
 package main
 
 import (
+	"archive/tar"
 	"errors"
+	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -9,14 +12,15 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/ssh"
-
 	"github.com/dtylman/scp"
+	"golang.org/x/crypto/ssh"
 )
 
 const (
 	// DirectionUpload specifies an upload of local files to a remote target.
 	DirectionUpload = "upload"
+	// 是否以zip方式上传
+	DirectionUploadZip = "uploadZip"
 	// DirectionDownload specifies the download of remote files to a local target.
 	DirectionDownload = "download"
 )
@@ -40,7 +44,7 @@ func main() {
 
 	// Parse direction.
 	direction := os.Getenv("DIRECTION")
-	if direction != DirectionDownload && direction != DirectionUpload {
+	if direction != DirectionDownload && direction != DirectionUploadZip && direction != DirectionUpload {
 		log.Fatalf("❌ Failed to parse direction: %v", errors.New("direction must be either upload or download"))
 	}
 
@@ -122,9 +126,23 @@ func Copy(client *ssh.Client) {
 		copy = scp.CopyFrom
 		emoji = "🔽"
 	}
+
 	if direction == DirectionUpload {
 		copy = scp.CopyTo
 		emoji = "🔼"
+	}
+
+	if direction == DirectionUploadZip {
+		copy = scp.CopyTo
+		emoji = "🔼"
+		// 打包zip并把路径重置为zip路径
+		log.Println("📑 zip压缩(Zip compressed file)")
+		var src = sourceFiles[0]
+		var dst = fmt.Sprintf("%s.tar.gz", src)
+
+		err := tarDecompress(src, dst)
+		log.Fatalf("❌ Failed to %s file from remote: %v", os.Getenv("DIRECTION"), err)
+		sourceFiles[0] = dst
 	}
 
 	log.Printf("%s %sing ...\n", emoji, strings.Title(direction))
@@ -207,4 +225,46 @@ func ConfigureHostKeyCallback(expected string, skip string) ssh.HostKeyCallback 
 
 		return nil
 	}
+}
+
+// 文件夹tar压缩
+func tarDecompress(tarfile, dest string) error {
+	fr, err := os.Open(tarfile)
+	if err != nil {
+		log.Fatalf("❌ Failed to Zip compressed file: %v", err)
+		return err
+	}
+	defer fr.Close()
+	tr := tar.NewReader(fr)
+	for {
+		h, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("❌ Failed to Zip compressed file: %v", err)
+			return err
+		}
+		if h.FileInfo().IsDir() {
+			err = os.MkdirAll(dest+h.Name, os.ModePerm)
+			if err != nil {
+				log.Fatalf("❌ Failed to Zip compressed file: %v", err)
+				return err
+			}
+			continue
+		}
+		fw, err := os.OpenFile(dest+h.Name, os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			log.Fatalf("❌ Failed to Zip compressed file: %v", err)
+			return err
+		}
+		defer fw.Close()
+		_, err = io.Copy(fw, tr)
+		if err != nil {
+			log.Fatalf("❌ Failed to Zip compressed file: %v", err)
+			return err
+		}
+	}
+	log.Fatalf("❌ Failed to Zip compressed file: %v", err)
+	return nil
 }
