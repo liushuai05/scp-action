@@ -39,46 +39,6 @@ func main() {
 		}
 	}
 
-	// 	os.Setenv("KEY", `-----BEGIN OPENSSH PRIVATE KEY-----
-	// b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
-	// NhAAAAAwEAAQAAAYEA6KIlO9HmYBwXcUKlLPedVkWp17CwwDV8Jio7oEa3XzOl6NURBgzW
-	// F8zvhbP/Xt7Gn0J+EXhku8QFO0MdbW2+NA2Nfk3jNGc5DQo/1eeJxkf8wqxAL3r6S8smRh
-	// Q6/oqJ/UKSqI8T1q+asvQUF1al9KAZ3CvTshQEZTBL6RBbGSaRzBNLXizfuTeFkJ4mUdF7
-	// UKN+8sA+7ZyzrtUjFUxMvDQOV+SclPq4OL96/hggFfjp2SX8p0d233VXVLKDVsNodHgCni
-	// pl597XUTR7My7KokxSLZj7/VBPTECEK7t+TtOOfspECIhe1j90WkUpHCAd3zn2MyXQYYb5
-	// 5+NN+zN3SErA2nnR3YOIKJJFtjAQIVTtPchFx5ZpwebLVyOw4UTPoCTNlqat74eebYBk7w
-	// P1SmbSWnMLWFDuuR9nfh8DmGerSKMZTVGj75sFyF0LFVroULlfjDxSfCJMzDoqLNeXM4Cd
-	// m8lEd556b59xTjJ3e2fJX7yKo06zzHl66wfnyWMnAAAFiHtEaIp7RGiKAAAAB3NzaC1yc2
-	// EAAAGBAOiiJTvR5mAcF3FCpSz3nVZFqdewsMA1fCYqO6BGt18zpejVEQYM1hfM74Wz/17e
-	// xp9CfhF4ZLvEBTtDHW1tvjQNjX5N4zRnOQ0KP9XnicZH/MKsQC96+kvLJkYUOv6Kif1Ckq
-	// iPE9avmrL0FBdWpfSgGdwr07IUBGUwS+kQWxkmkcwTS14s37k3hZCeJlHRe1CjfvLAPu2c
-	// s67VIxVMTLw0DlfknJT6uDi/ev4YIBX46dkl/KdHdt91V1Syg1bDaHR4Ap4qZefe11E0ez
-	// MuyqJMUi2Y+/1QT0xAhCu7fk7Tjn7KRAiIXtY/dFpFKRwgHd859jMl0GGG+efjTfszd0hK
-	// wNp50d2DiCiSRbYwECFU7T3IRceWacHmy1cjsOFEz6AkzZamre+Hnm2AZO8D9Upm0lpzC1
-	// hQ7rkfZ34fA5hnq0ijGU1Ro++bBchdCxVa6FC5X4w8UnwiTMw6KizXlzOAnZvJRHeeem+f
-	// cU4yd3tnyV+8iqNOs8x5eusH58ljJwAAAAMBAAEAAAGAARcNhPUw/u/oF/lSauHj01TbLj
-	// TTWcHUDfE4TiGyANfUenmBARH639LPIp5E8h9RBEnuXABshGlimXNIQ7sgyQ095huM4gcv
-	// NP3QtbuDmqruocS6tZ/z377Dw6kBlKrjqiS3Hwla1UaszEnoKgHHRcnDTV1HctQeqcQUFP
-	// QqO5DggdCo4Fd8U7yhk/e0uopj8CPCYgyOrknhwfOSGvXSqml35hxSDH7EZARtrKlaUXS7
-	// cX0jfD86mvInC3qq82aZnr0/977SMWbuyA07lfjFdkETExJRPyzqk1Yt6/OLQ/9twlpc6T
-	// 0852TmouLIui3nIvqErrvB1TTv7aycLnw+dUu/dnksjJeNWMYqMTOuaLR09TQawtUvot6H
-	// YKIXVxV5iLcPbScf6YxuCEXhnNtGSYosDeWO6pbopv998nvVjlO80etkRulglNmYGEsSS8
-	// QaWq2H2588Utcr0MMCamNqXxCwen8zZB3KpD4R9C0IOZIXCoYnI+b0u/oXFy/qsqyZAAAA
-	// wGiuJ2g5DKth/h7HFQWzeYHPiWugRQHRKPql45Sg274DNlvsm0FVH2PFveI9gOOUvOb+XJ
-	// kDhE+dAfazn9X8/XfsKc62LFwStHQF6y5GKeJLrlu7P39fAiwa70fQe0qIV4pQtYkOrkrI
-	// 1F1p/qFvcgGvexgs9B0djIJMs6fqcSZquw2hE5DtPICztdPW4qrnkcECz3yrVtKO/b+LsR
-	// tEY93FBhCWBMmI+SCWDQlBGA7IWfFyT+PN8PvtsXGrMdi5ggAAAMEA8sZCLF7MvqKa95fr
-	// orGn8GajeNY5dB2l4yiWUlG68yBIlRFvhHDjBpZr4q1KMYeAeEojcMmtM+waEOHDXPSEDr
-	// BnCjaMiDfmiLQmwuzRYsXVfl23H65st02k1ug4xbzXqYiWY3xIbd7wPYCag28+FovsCLnT
-	// /jy5ee1pRhS3jdIpcr1d9rimwBYfAvDMclzsWEHjUNKLXpC83qxUKedo/2t3CwP/BUJPqS
-	// 2GPjYr7ZfA6YAbvOjqs1aFMycu8g/JAAAAwQD1TnWSIhqROuHeV9fTgTnCiiWg1Rn1HlQU
-	// UQHR5mrNROP1b4cJHdx27dmLT7MqAWsCk4Qb/NdrTBDjJSQzayQo62Mr56EeGgwi6XKXmd
-	// iDOgPASWytztgK8bX2miMuKho055TDKkOwRM88ezhrDWx1H8ezWsgWcx6IZX8gJwe1oVme
-	// GbLFbqJ8KYfE1X+AaHZU60JiK/j4bna2pAvgrWw7NmHN6+r0YjF4tOEdZvYrjYgz7X61vn
-	// AX7rCbJ9Dzs28AAAAQNzQ3MzU3NzY2QHFxLmNvbQECAw==
-	// -----END OPENSSH PRIVATE KEY-----`)
-
-	fmt.Println("name: ", os.Getenv("KEY"))
 	// Parse timeout.
 	actionTimeout, err := time.ParseDuration(os.Getenv("ACTION_TIMEOUT"))
 	if err != nil {
@@ -199,7 +159,23 @@ func Copy(client *ssh.Client) {
 		// 	log.Fatalf("❌ Failed to %s file from remote: %v", os.Getenv("DIRECTION"), err)
 		// }
 
-		cmd := exec.Command("zip", "-r", dst, src)
+		exclude := os.Getenv("EXCLUDE")
+
+		excludeArr := strings.Split(exclude, ",")
+
+		args := []string{"-r", dst, src} //  "-x", "test/1.txt", "-x", "test/2.txt"
+
+		for _, v := range excludeArr {
+			// excludeStr += " -x='" + v + "'"
+			args = append(args, "-x")
+			args = append(args, v)
+		}
+
+		fmt.Println(args)
+		// -x "/dist/.webpackFSCache/*"
+
+		cmd := exec.Command("zip", args...)
+		// cmd := exec.Command("zip", "-r", dst, src, "-x", "test/1.txt", "-x", "test/2.txt")
 		var out bytes.Buffer
 		cmd.Stdout = &out
 		cmd.Env = append(os.Environ(),
@@ -335,7 +311,7 @@ func SSHUnZip(sshClient *ssh.Client, remote string) error {
 		return err
 	}
 	defer writer.Close()
-	err = session.Start("unzip " + remote + " -d -o " + filepath.ToSlash(filepath.Dir(remote)))
+	err = session.Start("unzip -o " + remote + " -d " + filepath.ToSlash(filepath.Dir(remote)))
 
 	if err != nil {
 		return err
