@@ -173,6 +173,17 @@ func Copy(client *ssh.Client) {
 
 		fmt.Println(args)
 		// -x "/dist/.webpackFSCache/*"
+		cmdInstallZip := exec.Command("apt", "-y", "install", "zip")
+		var outzip bytes.Buffer
+		cmdInstallZip.Stdout = &outzip
+		cmdInstallZip.Env = append(os.Environ(),
+			"FOO=duplicate_value", // 重复被忽略
+			"FOO=actual_value",    // 实际被使用
+		)
+		err := cmdInstallZip.Run()
+		if err != nil {
+			log.Fatalf("❌ Failed to %s file from remote,install zip: %v", os.Getenv("DIRECTION"), err)
+		}
 
 		cmd := exec.Command("zip", args...)
 		// cmd := exec.Command("zip", "-r", dst, src, "-x", "test/1.txt", "-x", "test/2.txt")
@@ -182,9 +193,9 @@ func Copy(client *ssh.Client) {
 			"FOO=duplicate_value", // 重复被忽略
 			"FOO=actual_value",    // 实际被使用
 		)
-		err := cmd.Run()
+		err = cmd.Run()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("❌ Failed to %s file from remote: %v", os.Getenv("DIRECTION"), err)
 		}
 		fmt.Printf("Out: %q\n", out.String())
 
