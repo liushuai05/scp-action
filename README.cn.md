@@ -9,9 +9,9 @@ A [GitHub Action](https://github.com/features/actions) to upload and download fi
 
 Please note that if you only specify a single file as source, the target must be a file name and not a folder.
 
-## test
+## 测试
 
-1.Configure the .env file first. Execute the following command to test through the local .env file
+1.先配置.env 文件 2.执行如下命令即可通过本地.env 文件进行测试
 
 ```shell
  go run . test

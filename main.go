@@ -1,13 +1,13 @@
 package main
 
 import (
-	"archive/tar"
+	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -30,9 +30,13 @@ const (
 type copyFunc func(client *ssh.Client, source string, target string) (int64, error)
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
+	for idx, args := range os.Args {
+		if idx == 1 && args == "test" {
+			err := godotenv.Load()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 
 	// 	os.Setenv("KEY", `-----BEGIN OPENSSH PRIVATE KEY-----
@@ -159,6 +163,7 @@ func main() {
 	defer targetClient.Close()
 
 	Copy(targetClient)
+
 }
 
 // Copy transfers files between remote host and local machine.
@@ -186,20 +191,33 @@ func Copy(client *ssh.Client) {
 		log.Println("📑 tar.gz压缩(Tar compressed file)")
 		var src = sourceFiles[0]
 		// var dst = fmt.Sprintf("%s.tar.gz", src)
-		var dst = "./tar_test"
+		var dst = "./tar_test.zip"
 
 		// err := tarDecompress(src, dst)
-		path, err := Tar(src, dst)
+		// path, err := Tar(src, dst)
+		// if err != nil {
+		// 	log.Fatalf("❌ Failed to %s file from remote: %v", os.Getenv("DIRECTION"), err)
+		// }
+
+		cmd := exec.Command("zip", "-r", dst, src)
+		var out bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Env = append(os.Environ(),
+			"FOO=duplicate_value", // 重复被忽略
+			"FOO=actual_value",    // 实际被使用
+		)
+		err := cmd.Run()
 		if err != nil {
-			log.Fatalf("❌ Failed to %s file from remote: %v", os.Getenv("DIRECTION"), err)
+			log.Fatal(err)
 		}
+		fmt.Printf("Out: %q\n", out.String())
 
 		// 解压测试
 		// if err := UnTar(path, "./un_tar_test"); err != nil {
 		// 	log.Fatalf("❌ Failed to %s file from remote: %v", os.Getenv("DIRECTION"), err)
 		// }
 
-		sourceFiles[0] = path
+		sourceFiles[0] = dst
 
 	}
 
@@ -212,6 +230,22 @@ func Copy(client *ssh.Client) {
 		log.Println("📑 " + sourceFiles[0] + " >> " + targetFileOrFolder)
 
 		log.Println("📡 Transferred 1 file")
+
+		// // tar.gz copy 完成后要进行解压
+		// if direction == DirectionUploadZip {
+		// 	paths, _ := filepath.Split(targetFileOrFolder)
+		// 	// 解压到哪里
+		// 	// unPath := strings.Replace(targetFileOrFolder, ".tar.gz", "/", -1)
+		// 	// 解压测试
+		// 	if err := UnTar(targetFileOrFolder, paths); err != nil {
+		// 		log.Fatalf("❌ Failed to %s file from remote: %v", os.Getenv("DIRECTION"), err)
+		// 	}
+		// }
+
+		err := SSHUnZip(client, targetFileOrFolder)
+		if err != nil {
+			log.Fatalf("❌ Failed to %s file from remote: %v", os.Getenv("DIRECTION"), err)
+		}
 	} else {
 		transferredFiles := int64(0)
 
@@ -285,137 +319,31 @@ func ConfigureHostKeyCallback(expected string, skip string) ssh.HostKeyCallback 
 	}
 }
 
-// 文件夹tar压缩
-func tarDecompress(tarfile, dest string) error {
-	fr, err := os.Open(tarfile)
-	if err != nil {
-		log.Fatalf("❌ Failed to Zip compressed file: %v", err)
-		return err
-	}
-	defer fr.Close()
-	tr := tar.NewReader(fr)
-	for {
-		h, err := tr.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatalf("❌ Failed to Zip compressed file: %v", err)
-			return err
-		}
-		if h.FileInfo().IsDir() {
-			err = os.MkdirAll(dest+h.Name, os.ModePerm)
-			if err != nil {
-				log.Fatalf("❌ Failed to Zip compressed file: %v", err)
-				return err
-			}
-			continue
-		}
-		fw, err := os.OpenFile(dest+h.Name, os.O_CREATE|os.O_WRONLY, 0666)
-		if err != nil {
-			log.Fatalf("❌ Failed to Zip compressed file: %v", err)
-			return err
-		}
-		defer fw.Close()
-		_, err = io.Copy(fw, tr)
-		if err != nil {
-			log.Fatalf("❌ Failed to Zip compressed file: %v", err)
-			return err
-		}
-	}
-	log.Fatalf("❌ Failed to Zip compressed file: %v", err)
-	return nil
-}
-
-func Tar(source, target string) (string, error) {
-	filename := filepath.Base(source)
-	target = filepath.Join(target, fmt.Sprintf("%s.tar.gz", filename))
-
-	tarfile, err := os.Create(target)
-	if err != nil {
-		return "", err
-	}
-	defer tarfile.Close()
-
-	tarball := tar.NewWriter(tarfile)
-	defer tarball.Close()
-
-	info, err := os.Stat(source)
-	if err != nil {
-		return "", err
-	}
-
-	var baseDir string
-	if info.IsDir() {
-		baseDir = filepath.Base(source)
-	}
-
-	return target, filepath.Walk(source,
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			header, err := tar.FileInfoHeader(info, info.Name())
-			if err != nil {
-				return err
-			}
-
-			if baseDir != "" {
-				header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, source))
-			}
-
-			if err := tarball.WriteHeader(header); err != nil {
-				return err
-			}
-
-			if info.IsDir() {
-				return nil
-			}
-
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-			_, err = io.Copy(tarball, file)
-			return err
-		})
-}
-
-func UnTar(tarball, target string) error {
-	reader, err := os.Open(tarball)
+// zip远程解压
+func SSHUnZip(sshClient *ssh.Client, remote string) error {
+	session, err := sshClient.NewSession()
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
-	tarReader := tar.NewReader(reader)
-
-	for {
-		header, err := tarReader.Next()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			return err
-		}
-
-		path := filepath.Join(target, header.Name)
-		info := header.FileInfo()
-		if info.IsDir() {
-			if err = os.MkdirAll(path, info.Mode()); err != nil {
-				return err
-			}
-			continue
-		}
-
-		file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		_, err = io.Copy(file, tarReader)
-		if err != nil {
-			return err
-		}
+	defer session.Close()
+	stderr := &bytes.Buffer{}
+	session.Stderr = stderr
+	stdout := &bytes.Buffer{}
+	session.Stdout = stdout
+	writer, err := session.StdinPipe()
+	if err != nil {
+		return err
 	}
+	defer writer.Close()
+	err = session.Start("unzip " + remote + " -d -o " + filepath.ToSlash(filepath.Dir(remote)))
+
+	if err != nil {
+		return err
+	}
+
+	session.Wait()
+	fmt.Println(remote)
+
+	//NOTE: Process exited with status 1 is not an error, it just how scp work. (waiting for the next control message and we send EOF)
 	return nil
 }
