@@ -266,7 +266,6 @@ func ConfigureAuthentication(key string, passphrase string, password string) []s
 		} else {
 			targetSigner, err = ssh.ParsePrivateKey([]byte(key))
 		}
-		fmt.Println(key)
 		if err != nil {
 			log.Fatalf("❌ Failed to parse private key: %v", err)
 		}
