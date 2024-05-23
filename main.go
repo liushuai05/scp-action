@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/dtylman/scp"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -28,6 +29,10 @@ const (
 type copyFunc func(client *ssh.Client, source string, target string) (int64, error)
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Parse timeout.
 	actionTimeout, err := time.ParseDuration(os.Getenv("ACTION_TIMEOUT"))
 	if err != nil {
