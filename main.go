@@ -353,7 +353,6 @@ func Zipit(source, target, filter string) error {
 	if info.IsDir() {
 		baseDir = filepath.Base(source)
 	}
-
 	excludeArr := strings.Split(filter, ",")
 
 	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
@@ -385,8 +384,8 @@ func Zipit(source, target, filter string) error {
 				return nil
 			}
 
-			fmt.Println(strings.HasSuffix(old_v, "/") == true, strings.HasPrefix(path, v))
-			fmt.Println(path, v)
+			// fmt.Println(strings.HasSuffix(old_v, "/") == true, strings.HasPrefix(path, v))
+			// fmt.Println(path, v)
 			//判断排除目录
 			if strings.HasSuffix(old_v, "/") == true && strings.HasPrefix(path, v+"/") {
 				return nil
