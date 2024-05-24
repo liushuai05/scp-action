@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -371,6 +370,10 @@ func Zipit(source, target, filter string) error {
 		if ism {
 			return nil
 		}
+		if source+"/tar_test.zip" == path {
+			return nil
+		}
+
 		for _, v := range excludeArr {
 			old_v := v
 			isAbs := filepath.IsAbs(v)
@@ -463,7 +466,6 @@ func SSHUnZip(sshClient *ssh.Client, remote string) error {
 	}
 
 	session.Wait()
-	fmt.Println(remote)
 
 	//NOTE: Process exited with status 1 is not an error, it just how scp work. (waiting for the next control message and we send EOF)
 	return nil
