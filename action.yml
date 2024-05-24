@@ -68,7 +68,7 @@ inputs:
 
 runs:
   using: "docker"
-  image: "docker://ghcr.io/liushuai05/scp-action:v0.0.1"
+  image: "docker://ghcr.io/liushuai05/scp-action:main"
   env:
     DIRECTION: ${{ inputs.direction }}
     SOURCE: ${{ inputs.source }}
